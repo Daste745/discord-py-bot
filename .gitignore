@@ -1,0 +1,10 @@
+# IDE config directories
+.vscode/
+.idea/
+
+# Python virtual env
+venv/
+
+# Old and backup files (useful for backing up stuff, but we shouldn't track them)
+*.old
+*.bak
