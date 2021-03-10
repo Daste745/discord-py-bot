@@ -1,13 +1,13 @@
 import os
 import logging
 
-from discord.ext import commands
+from discord.ext.commands import Bot as BaseBot, errors
 
 
 log = logging.getLogger(__name__)
 
 
-class Bot(commands.Bot):
+class Bot(BaseBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.load_cogs()
@@ -26,7 +26,7 @@ class Bot(commands.Bot):
         for extension in extensions:
             try:
                 self.load_extension(extension)
-            except commands.errors.ExtensionAlreadyLoaded:
+            except errors.ExtensionAlreadyLoaded:
                 pass
 
         log.info(f"Loaded {len(self.commands)} commands from {len(self.cogs)} cogs")
@@ -37,10 +37,10 @@ class Bot(commands.Bot):
         for extension in list(self.extensions):
             try:
                 self.reload_extension(extension)
-            except commands.errors.NoEntryPointError:
+            except errors.NoEntryPointError:
                 log.info("The extension {extension} has no setup function")
                 pass
-            except commands.errors.ExtensionAlreadyLoaded:
+            except errors.ExtensionAlreadyLoaded:
                 pass
 
         log.info(f"Reloaded {len(self.extensions)} cogs")
