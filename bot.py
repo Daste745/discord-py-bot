@@ -1,7 +1,8 @@
 import os
 import logging
 
-from discord.ext.commands import Bot as BaseBot, errors
+from discord import Embed, Color
+from discord.ext.commands import Bot as BaseBot, Context, errors
 
 
 log = logging.getLogger(__name__)
@@ -44,3 +45,39 @@ class Bot(BaseBot):
                 pass
 
         log.info(f"Reloaded {len(self.extensions)} cogs")
+
+    async def on_ready(self):
+        log.info(f"Bot ready as {self.user}")
+
+    async def on_command_error(self, ctx: Context, exception: Exception):
+        # Base error message title
+        title = "Error"
+
+        try:
+            # Raising here for the sake of code readibility.
+            # These checks can be easily accomplished with if/elif statements.
+            # TODO: For Python 3.10: use pattern matching.
+            raise exception
+        except errors.CommandNotFound:
+            # Ignore CommandNotFound, because it doesn't mean much for us.
+            return
+        except (errors.MissingRequiredArgument, errors.TooManyArguments):
+            # Send command help if the user types too many or not enough arguments.
+            # This approach is much cleaner than throwing a
+            # 'too many arguments' error at them.
+            return await ctx.send_help(ctx.command)
+        except (errors.NotOwner, errors.MissingPermissions):
+            title = "Insufficient permissions"
+        except errors.BotMissingPermissions:
+            title = "Missing bot permissions"
+        except errors.NSFWChannelRequired:
+            title = "This channel is not NSFW"
+        except errors.CommandOnCooldown:
+            title = "Cooldown"
+        except Exception:
+            # Anything not matched above we just log as an error.
+            log.exception(exception)
+            # pass
+
+        embed = Embed(title=title, description=str(exception), color=Color.red())
+        await ctx.send(embed=embed)
