@@ -2,13 +2,14 @@ import os
 import logging
 
 from discord import Embed, Color
-from discord.ext.commands import Bot as BaseBot, Context, errors
+from discord.ext import commands
+from discord.ext.commands import errors
 
 
 log = logging.getLogger(__name__)
 
 
-class Bot(BaseBot):
+class Bot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.load_cogs()
@@ -49,7 +50,7 @@ class Bot(BaseBot):
     async def on_ready(self):
         log.info(f"Bot ready as {self.user}")
 
-    async def on_command_error(self, ctx: Context, exception: Exception):
+    async def on_command_error(self, ctx: commands.Context, exception: Exception):
         # Base error message title
         title = "Error"
 
@@ -74,6 +75,14 @@ class Bot(BaseBot):
             title = "This channel is not NSFW"
         except errors.CommandOnCooldown:
             title = "Cooldown"
+        except (
+            commands.RoleNotFound,
+            commands.ChannelNotFound,
+            commands.UserNotFound,
+            commands.MemberNotFound,
+            commands.MessageNotFound,
+        ):
+            title = "Not found"
         except Exception:
             # Anything not matched above we just log as an error.
             log.exception(exception)
